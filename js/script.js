@@ -20,7 +20,7 @@ function Tracks() {
   var audioElements = {};
   var currentlyPlaying = {};
   var currentElement = 0;
-  var timeout = $.browser.chrome ? 150 : 0;
+  var timeout = $.browser.webkit ? 150 : 0;
 
   function init() {
     $.each(channels, function (i, channel) {
@@ -40,15 +40,11 @@ function Tracks() {
     });
 
     $(audioElements['silence'][0]).bind('ended', function () {
-      setTimeout(function () {
-        togglePlaying();
-      }, timeout);
+      togglePlaying();
     });
 
     $(audioElements['silence'][1]).bind('ended', function () {
-      setTimeout(function () {
-        togglePlaying();
-      }, timeout);
+      togglePlaying();
     });
 
 
@@ -82,14 +78,23 @@ function Tracks() {
   }
 
   function togglePlaying() {
-    $.each(audioElements, function (key, elements) {
-      elements[currentElement].currentTime = 0;
-      elements[currentElement].pause();
-      if (currentlyPlaying[key]) {
-        elements[1 - currentElement].play();
-      }
-    });
-    currentElement = 1 - currentElement;
+    function toggle() {
+      $.each(audioElements, function (key, elements) {
+        elements[currentElement].currentTime = 0;
+        elements[currentElement].pause();
+        if (currentlyPlaying[key]) {
+          elements[1 - currentElement].play();
+        }
+      });
+      currentElement = 1 - currentElement;
+    }
+
+    if (timeout > 0) {
+      setTimeout(toggle, timeout);
+    }
+    else {
+      toggle();
+    }
   }
 
   return {
