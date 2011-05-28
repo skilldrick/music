@@ -1,14 +1,23 @@
 //http://forestmist.org/2010/04/html5-audio-loops/
 
-(function () {
-  var position = 0;
-  var channels = {
-    'miles chords': {playing: true},
-    'miles chords reversed': {playing: true}
-  };
 
-  $(function () {
-    $.each(channels, function (channel, info) {
+$(function () {
+  var tracks = Tracks();
+  tracks.init();
+});
+
+function Tracks() {
+  var channels = [
+    'silence', //4 seconds of silence, always playing
+    'miles chords',
+    'miles chords reversed'
+  ];
+
+  var audioElements = {};
+  var currentElement = 0;
+
+  function init() {
+    $.each(channels, function (i, channel) {
       for (var i = 0; i < 2; i++) {
         var $el = $('<audio/>').attr({
           'src': 'miles/samples/' + channel + '.ogg',
@@ -16,51 +25,41 @@
           'id': channel + i.toString()
         }).appendTo($('body'));
 
-        info['audio'] = info['audio'] || [];
-        info['audio'][i] = $el[0];
+        audioElements[channel] = audioElements[channel] || [];
+        audioElements[channel][i] = $el[0];
       }
     });
-    $(channels['miles chords'].audio[0]).bind('ended', function () {
-      this.currentTime = 0;
-      this.pause();
-      channels['miles chords'].audio[1].play();
-      var otherAudio = channels['miles chords reversed'].audio;
-      otherAudio[0].currentTime = 0;
-      otherAudio[0].pause();
-      otherAudio[1].play();
-    });
-    $(channels['miles chords'].audio[1]).bind('ended', function () {
-      this.currentTime = 0;
-      this.pause();
-      channels['miles chords'].audio[0].play();
-      var otherAudio = channels['miles chords reversed'].audio;
-      otherAudio[1].currentTime = 0;
-      otherAudio[1].pause();
-      otherAudio[0].play();
-    });
-    channels['miles chords'].audio[0].play();
+    console.log(audioElements.silence[0]);
 
-  });
+    $(audioElements['silence'][0]).bind('ended', function () {
+      togglePlaying(audioElements['silence']);
+      togglePlaying(audioElements['miles chords']);
+      togglePlaying(audioElements['miles chords reversed']);
 
-
-  function playAudio() {
-    $.each(channels, function (channel, info) {
-      if (info.playing) {
-        info['audio'][0].play();
-      }
+      currentElement = +!currentElement; //+! toggles 1 and 0
     });
-    position++;
+
+    $(audioElements['silence'][1]).bind('ended', function () {
+      togglePlaying(audioElements['silence']);
+      togglePlaying(audioElements['miles chords']);
+      togglePlaying(audioElements['miles chords reversed']);
+
+      currentElement = +!currentElement;
+    });
+
+    audioElements['silence'][0].play();
   }
 
+  function togglePlaying(elements) {
+    elements[currentElement].currentTime = 0;
+    elements[currentElement].pause();
+    elements[+!currentElement].play();
+  }
 
-
-  window.stop = function () {
-    $.each(channels, function (channel, info) {
-      info.playing = false;
-    });
+  return {
+    init: init
   };
-
-
-})();
+};
+  
 
 
