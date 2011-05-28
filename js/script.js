@@ -4,21 +4,23 @@ var tracks = Tracks();
 
 $(function () {
   tracks.init();
+
 });
 
 function Tracks() {
   var channels = [
     'silence', //4 seconds of silence, always playing
-    'miles chords',
-    'miles chords reversed',
-    'miles extra',
-    'miles loop stretched3',
+    'chords',
+    'chords_reversed',
+    'extra',
+    'main',
     'hats'
   ];
 
   var audioElements = {};
   var currentlyPlaying = {};
   var currentElement = 0;
+  var timeout = $.browser.chrome ? 150 : 0;
 
   function init() {
     $.each(channels, function (i, channel) {
@@ -31,23 +33,44 @@ function Tracks() {
 
         audioElements[channel] = audioElements[channel] || [];
         audioElements[channel][i] = $el[0];
-        currentlyPlaying[channel] = false;
+        currentlyPlaying[channel] = true;
       }
       currentlyPlaying['silence'] = true;
-      currentlyPlaying['miles loop stretched3'] = true;
+      currentlyPlaying['main'] = true;
     });
 
     $(audioElements['silence'][0]).bind('ended', function () {
-      togglePlaying();
-      currentElement = 1 - currentElement;
+      setTimeout(function () {
+        togglePlaying();
+      }, timeout);
     });
 
     $(audioElements['silence'][1]).bind('ended', function () {
-      togglePlaying();
-      currentElement = 1 - currentElement;
+      setTimeout(function () {
+        togglePlaying();
+      }, timeout);
     });
 
+
     audioElements['silence'][0].play();
+    //startWhenReady();
+  }
+
+
+  function startWhenReady() {
+    var ready = true;
+    $.each(audioElements, function (key, elements) {
+      if (! elements[0].readyState) {
+        ready = false;
+        return false;
+      }
+    });
+    if (! ready) {
+      setTimeout(startWhenReady, 100);
+    }
+    else {
+      togglePlaying();
+    }
   }
 
   function addToPlaying(channel) {
@@ -66,6 +89,7 @@ function Tracks() {
         elements[1 - currentElement].play();
       }
     });
+    currentElement = 1 - currentElement;
   }
 
   return {
