@@ -1,8 +1,8 @@
 //http://forestmist.org/2010/04/html5-audio-loops/
 
+var tracks = Tracks();
 
 $(function () {
-  var tracks = Tracks();
   tracks.init();
 });
 
@@ -10,10 +10,14 @@ function Tracks() {
   var channels = [
     'silence', //4 seconds of silence, always playing
     'miles chords',
-    'miles chords reversed'
+    'miles chords reversed',
+    'miles extra',
+    'miles loop stretched3',
+    'hats'
   ];
 
   var audioElements = {};
+  var currentlyPlaying = {};
   var currentElement = 0;
 
   function init() {
@@ -27,37 +31,47 @@ function Tracks() {
 
         audioElements[channel] = audioElements[channel] || [];
         audioElements[channel][i] = $el[0];
+        currentlyPlaying[channel] = false;
       }
+      currentlyPlaying['silence'] = true;
+      currentlyPlaying['miles loop stretched3'] = true;
     });
-    console.log(audioElements.silence[0]);
 
     $(audioElements['silence'][0]).bind('ended', function () {
-      togglePlaying(audioElements['silence']);
-      togglePlaying(audioElements['miles chords']);
-      togglePlaying(audioElements['miles chords reversed']);
-
-      currentElement = +!currentElement; //+! toggles 1 and 0
+      togglePlaying();
+      currentElement = 1 - currentElement;
     });
 
     $(audioElements['silence'][1]).bind('ended', function () {
-      togglePlaying(audioElements['silence']);
-      togglePlaying(audioElements['miles chords']);
-      togglePlaying(audioElements['miles chords reversed']);
-
-      currentElement = +!currentElement;
+      togglePlaying();
+      currentElement = 1 - currentElement;
     });
 
     audioElements['silence'][0].play();
   }
 
-  function togglePlaying(elements) {
-    elements[currentElement].currentTime = 0;
-    elements[currentElement].pause();
-    elements[+!currentElement].play();
+  function addToPlaying(channel) {
+    currentlyPlaying[channel] = true;
+  }
+
+  function removeFromPlaying(channel) {
+    currentlyPlaying[channel] = false;
+  }
+
+  function togglePlaying() {
+    $.each(audioElements, function (key, elements) {
+      elements[currentElement].currentTime = 0;
+      elements[currentElement].pause();
+      if (currentlyPlaying[key]) {
+        elements[1 - currentElement].play();
+      }
+    });
   }
 
   return {
-    init: init
+    init: init,
+    addToPlaying: addToPlaying,
+    removeFromPlaying: removeFromPlaying
   };
 };
   
