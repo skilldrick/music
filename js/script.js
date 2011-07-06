@@ -4,7 +4,6 @@ var tracks = Tracks();
 
 $(function () {
   tracks.init();
-
 });
 
 function Tracks() {
@@ -23,21 +22,26 @@ function Tracks() {
   var timeout = $.browser.webkit ? 150 : 0;
 
   function init() {
-    $.each(channels, function (i, channel) {
+    $.each(channels, function (chNumber, channel) {
       for (var i = 0; i < 2; i++) {
         var $el = $('<audio/>').attr({
           'src': 'miles/samples/' + channel + '.ogg',
           'preload': 'true',
           'id': channel + i.toString()
-        }).appendTo($('body'));
+        }).appendTo('body');
 
         audioElements[channel] = audioElements[channel] || [];
         audioElements[channel][i] = $el[0];
-        currentlyPlaying[channel] = true;
+        currentlyPlaying[channel] = false;
       }
-      currentlyPlaying['silence'] = true;
-      currentlyPlaying['main'] = true;
+
+      if (chNumber > 0) {
+        $('#track-label').tmpl({number: chNumber, channel: channel}).appendTo('body');
+      }
     });
+
+    currentlyPlaying['silence'] = true;
+    currentlyPlaying['main'] = true;
 
     $(audioElements['silence'][0]).bind('ended', function () {
       togglePlaying();
@@ -45,6 +49,16 @@ function Tracks() {
 
     $(audioElements['silence'][1]).bind('ended', function () {
       togglePlaying();
+    });
+
+    $('.play').click(function () {
+      var trackNumber = $(this).data('track');
+      addToPlaying(channels[trackNumber]);
+    });
+
+    $('.stop').click(function () {
+      var trackNumber = $(this).data('track');
+      removeFromPlaying(channels[trackNumber]);
     });
 
 

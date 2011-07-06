@@ -18,6 +18,11 @@
 
   <script src="js/libs/modernizr-1.7.min.js"></script>
   <script src="js/libs/respond.min.js"></script>
+
+  <script id="track-label" type="text/x-jquery-tmpl">
+    <p><a class='play' data-track='${number}' href='#'>Play ${channel}</a></p>
+    <p><a class='stop' data-track='${number}' href='#'>Stop ${channel}</a></p>
+  </script>
 </head>
 
 <body>
@@ -37,6 +42,7 @@
   <script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.1.min.js">\x3C/script>')</script>
 
 
+  <script src="js/libs/jquery.tmpl.js"></script>
   <script src="js/plugins.js"></script>
   <script src="js/script.js"></script>
 	
